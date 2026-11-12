@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skica User Guide</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<nav class="toc">
+  <a class="brand" href="#top"><img src="images/icon.png" alt=""> Skica</a>
+  <ol>
+    <li><a href="#start">Getting started</a></li>
+    <li><a href="#window">The window</a></li>
+    <li><a href="#keyboard">Working from the keyboard</a></li>
+    <li><a href="#shapes">Shapes and artboards</a></li>
+    <li><a href="#selecting">Selecting and arranging</a></li>
+    <li><a href="#style">Fills, borders and effects</a></li>
+    <li><a href="#text">Text</a></li>
+    <li><a href="#images">Images and cropping</a></li>
+    <li><a href="#vectors">Paths, booleans and masks</a></li>
+    <li><a href="#symbols">Symbols, styles and colors</a></li>
+    <li><a href="#layout">Layout: align, constraints, stacks</a></li>
+    <li><a href="#pages">Pages</a></li>
+    <li><a href="#commandline">Command line reference</a></li>
+    <li><a href="#export">Export</a></li>
+    <li><a href="#import">Import: SVG, Sketch, Figma</a></li>
+    <li><a href="#cli">The skica command</a></li>
+    <li><a href="#customize">Custom shortcuts</a></li>
+    <li><a href="#shortcuts">All shortcuts</a></li>
+    <li><a href="#files">Files and Quick Look</a></li>
+  </ol>
+</nav>
+
+<main id="top">
+<header class="cover">
+  <img src="images/icon.png" alt="Skica icon" class="cover-icon">
+  <h1>Skica User Guide</h1>
+  <p class="lead">A fast, keyboard-first design app for macOS. Every tool, property and layer is a few keys away,
+  and the mouse works the way it does in Sketch or Figma.</p>
+  <figure class="wide"><img src="images/overview.png" alt="The Skica window with the sample document"></figure>
+</header>
+
+<!-- ===================================================================== -->
+<section id="start">
+<h2>1. Getting started</h2>
+
+<h3>Install</h3>
+<p>Skica needs macOS 14 Sonoma or later on Apple silicon. Install it with Homebrew:</p>
+<pre><code>brew tap aleksandargosevski/tap
+brew trust aleksandargosevski/tap
+brew install skica
+ln -sfn "$(brew --prefix)/opt/skica/Skica.app" /Applications/Skica.app</code></pre>
+<p>The link puts Skica in <em>Applications</em>, so Spotlight, Raycast and the Dock find it, and it keeps pointing at
+the newest version after <code>brew upgrade</code>. The formula also installs the <a href="#cli"><code>skica</code></a> command.
+Open Skica once so Finder shows previews of <code>.skica</code> files.</p>
+
+<h3>First steps</h3>
+<ol>
+  <li>Choose <b>Help → New Sample Document</b> to get a file with artboards, a symbol, colors and a shared style to try things on.</li>
+  <li>Press <kbd>R</kbd> and drag on the canvas to draw a rectangle, or press <kbd>R</kbd> then <kbd>↩</kbd> to add one in the middle of the view and type its size.</li>
+  <li>Press <kbd>:</kbd> and type <code>fill #ff6600; r 12</code> to color it and round its corners.</li>
+  <li>Press <kbd>⌘P</kbd> to find any command, layer or page by name, and <kbd>?</kbd> to see every shortcut.</li>
+  <li>Press <kbd>⌘⇧E</kbd> to export the selection as a PNG.</li>
+</ol>
+<p class="tip">The status bar at the bottom always shows the current mode and the keys that work in it.
+When in doubt, look down.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section id="window">
+<h2>2. The window</h2>
+<p>The window has three columns and a status bar:</p>
+<dl>
+  <dt>Layers (left)</dt>
+  <dd>The pages of the document at the top and the layers of the current page below, topmost first.
+  Click to select, <kbd>⇧</kbd>-click to add, double-click or <kbd>↩</kbd> to rename. <b>Drag rows</b> to change the order,
+  or drop them on a group or artboard to move them inside; layers keep their place on the canvas.</dd>
+  <dt>Canvas (middle)</dt>
+  <dd>The current page. Scroll to pan; pinch, or scroll with <kbd>⌘</kbd> or <kbd>⌥</kbd>, to zoom; double-tap with two fingers to switch
+  between 100% and the whole page; hold <kbd>space</kbd> and drag to pan.</dd>
+  <dt>Inspector (right)</dt>
+  <dd>The properties of the selection. With nothing selected it shows the document's color palette and shared styles.</dd>
+  <dt>Status bar (bottom)</dt>
+  <dd>The current tool or mode with its keys, the selection's size and position, the pointer position, the zoom,
+  and the prompt or command line when one is open.</dd>
+</dl>
+<div class="figures two">
+  <figure><img src="images/layers-panel.png" alt="Layers panel"><figcaption>Pages and the layer tree. Symbols, stacks, text and images have their own icons.</figcaption></figure>
+  <figure><img src="images/zen.png" alt="Canvas only"><figcaption><kbd>⌘.</kbd> hides both panels; press it again to bring them back.</figcaption></figure>
+</div>
+<p><b>Resize the columns</b> by dragging the thin dividers between them. Each panel can be as wide as half the window;
+the widths are remembered for every window. <kbd>⌘⌥1</kbd> shows or hides the layers, <kbd>⌘⌥2</kbd> the inspector,
+and <kbd>g l</kbd> / <kbd>g i</kbd> move the keyboard focus to them (inspector fields accept arithmetic such as
+<code>100/3</code> or <code>+20</code>; <kbd>↑</kbd>/<kbd>↓</kbd> step by 1, with <kbd>⇧</kbd> by 10; <kbd>esc</kbd> returns to the canvas).</p>
+</section>
+
+<!-- ===================================================================== -->
+<section id="keyboard">
+<h2>3. Working from the keyboard</h2>
+<p>Everything in Skica can be done without the mouse. These are the pieces that make it work.</p>
+
+<h3>Single keys and sequences</h3>
+<p>Tools are single letters (<kbd>R</kbd> rectangle, <kbd>T</kbd> text…). Some commands are two-key sequences typed one after
+the other, like <kbd>g</kbd> <kbd>p</kbd> (go to page). Shortcuts follow the <em>position</em> of keys, so they work the same
+with a Serbian Cyrillic or any other keyboard layout.</p>
+
+<h3>The command palette</h3>
+<p><kbd>⌘P</kbd> searches every command, layer and page by fuzzy name: <code>expsel</code> finds “Export Selection…”, a layer name
+selects that layer. <kbd>⌘K</kbd> shows only the actions for the current selection, and <kbd>?</kbd> lists all shortcuts.</p>
+<div class="figures two">
+  <figure><img src="images/palette.png" alt="Command palette"><figcaption><kbd>⌘P</kbd>: commands, layers and pages, each with its shortcut.</figcaption></figure>
+  <figure><img src="images/shortcuts.png" alt="Shortcut list"><figcaption><kbd>?</kbd>: every shortcut, grouped and searchable.</figcaption></figure>
+</div>
+
+<h3>Picking layers with hints</h3>
+<p>Press <kbd>F</kbd> and every visible layer gets a short label; type the label to select that layer (like Vimium in a browser).
+<kbd>⇧F</kbd> adds the picked layer to the selection.</p>
+<figure class="wide"><img src="images/hints.png" alt="Hint labels on the canvas"><figcaption>Hint mode: type a label to select the layer under it.</figcaption></figure>
+
+<h3>Moving through the layer tree</h3>
+<table class="keys">
+  <tr><td><kbd>⇥</kbd> / <kbd>⇧⇥</kbd></td><td>Next / previous layer next to the selected one</td></tr>
+  <tr><td><kbd>↩</kbd></td><td>Into the selected group or artboard (its first child); on text, edit it</td></tr>
+  <tr><td><kbd>esc</kbd></td><td>Up to the parent, then deselect</td></tr>
+  <tr><td><kbd>⌘A</kbd></td><td>Select all layers next to the selected one (everything on the page when nothing is selected)</td></tr>
+</table>
+
+<h3>Size and position prompt</h3>
+<p>Press <kbd>=</kbd> (or <kbd>↩</kbd> right after drawing a shape) to type its frame. Values may be arithmetic, and
+<code>+</code>, <code>-</code>, <code>*</code> or <code>/</code> at the start change the current value:</p>
+<table class="keys">
+  <tr><td><code>200x120</code></td><td>Width 200, height 120</td></tr>
+  <tr><td><code>200x120 @ 40,80</code></td><td>Size and position</td></tr>
+  <tr><td><code>@ 40,80</code></td><td>Position only</td></tr>
+  <tr><td><code>150</code></td><td>A 150 × 150 square</td></tr>
+  <tr><td><code>x60</code></td><td>Height only</td></tr>
+  <tr><td><code>+20x</code>, <code>*2x</code></td><td>20 wider, twice as wide</td></tr>
+  <tr><td><code>iphone</code>, <code>a4</code></td><td>An artboard preset by (fuzzy) name</td></tr>
+</table>
+<figure class="wide"><img src="images/size-prompt.png" alt="Size prompt in the status bar"><figcaption>The size prompt opens in the status bar.</figcaption></figure>
+
+<h3>The command line</h3>
+<p><kbd>:</kbd> opens a command line that changes the selection in words: <code>w 200; fill #ff6600; border 2 #000 inside</code>.
+Commands are separated by <code>;</code>, numbers can be relative (<code>w +20</code>, <code>h *2</code>), colors can name palette
+swatches (<code>fill $brand</code>). <kbd>.</kbd> repeats the last command line on the new selection. See the
+<a href="#commandline">command line reference</a> for every command.</p>
+<figure class="wide"><img src="images/command-line.png" alt="Command line"><figcaption>Rounding, filling and adding a shadow to a card in one line.</figcaption></figure>
+
+<h3>Nudging and resizing</h3>
+<table class="keys">
+  <tr><td>Arrows (<kbd>⇧</kbd> ×10)</td><td>Move the selection; pan the canvas when nothing is selected</td></tr>
+  <tr><td><kbd>⌘</kbd> + arrows</td><td>Resize from the right / bottom edge</td></tr>
+  <tr><td><kbd>⌘⌥</kbd> + arrows</td><td>Resize from the left / top edge</td></tr>
+</table>
+</section>
+
+<!-- ===================================================================== -->
+<section id="shapes">
+<h2>4. Shapes and artboards</h2>
+<p>Pick a tool and drag on the canvas, or press <kbd>↩</kbd> to add the shape at a default size in the middle of the view
+and open the size prompt.</p>
+<table class="keys">
+  <tr><td><kbd>R</kbd></td><td>Rectangle (corner radius in the inspector or <code>:r 8</code>)</td></tr>
+  <tr><td><kbd>O</kbd></td><td>Oval</td></tr>
+  <tr><td><kbd>L</kbd></td><td>Line</td></tr>
+  <tr><td><kbd>Y</kbd></td><td>Polygon (number of sides in the inspector)</td></tr>
+  <tr><td><kbd>*</kbd></td><td>Star (points and inner radius in the inspector)</td></tr>
+  <tr><td><kbd>P</kbd></td><td>Pen, see <a href="#vectors">Paths</a></td></tr>
+  <tr><td><kbd>T</kbd></td><td>Text</td></tr>
+  <tr><td><kbd>A</kbd></td><td>Artboard</td></tr>
+  <tr><td><kbd>I</kbd></td><td>Image or SVG file</td></tr>
+</table>
+<p>While dragging: <kbd>⇧</kbd> makes squares, circles and 45° lines, <kbd>⌥</kbd> draws from the center, and <kbd>⌃</kbd> turns
+snapping off. Smart guides snap to the edges and centers of nearby layers and the artboard.</p>
+<p><b>Artboards</b> are top-level frames that clip their contents. Shapes drawn or dropped on an artboard go inside it.
+Type a preset name in the size prompt for common sizes: iPhone 16, iPhone 16 Pro Max, iPhone SE, Android, iPad,
+iPad Pro 13, Apple Watch, MacBook Air, MacBook Pro 14, Desktop, Desktop HD, A4, Letter, Instagram Post, Instagram Story,
+X Post, YouTube Thumbnail and App Icon.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section id="selecting">
+<h2>5. Selecting and arranging</h2>
+<ul>
+  <li>Click selects the top-level layer under the pointer (a group as a whole); <kbd>⌘</kbd>-click selects the deepest layer;
+  double-click goes into a group.</li>
+  <li><kbd>⇧</kbd>-click adds or removes a layer; drag on empty canvas for a marquee.</li>
+  <li>Drag the eight handles to resize: <kbd>⇧</kbd> keeps the proportions, <kbd>⌥</kbd> resizes from the center.</li>
+  <li><kbd>⌘G</kbd> groups, <kbd>⌘⇧G</kbd> ungroups. Resizing a group scales its contents.</li>
+  <li><kbd>⌘]</kbd> / <kbd>⌘[</kbd> move a layer forward / backward, with <kbd>⌥</kbd> to the front / back. In the layers list, drag rows.</li>
+  <li><kbd>⌘D</kbd> duplicates, <kbd>⌫</kbd> deletes, <kbd>⌘C</kbd> <kbd>⌘X</kbd> <kbd>⌘V</kbd> copy, cut and paste (also between documents).</li>
+  <li><kbd>⌘⇧H</kbd> hides, <kbd>⌘⇧L</kbd> locks, <kbd>⌘R</kbd> renames.</li>
+</ul>
+<figure class="wide"><img src="images/selection.png" alt="A selected card with its inspector"><figcaption>A selected layer: handles and size on the canvas, its properties in the inspector.</figcaption></figure>
+</section>
+
+<!-- ===================================================================== -->
+<section id="style">
+<h2>6. Fills, borders and effects</h2>
+<div class="side">
+  <figure class="inspector"><img src="images/inspector-style.png" alt="Style sections of the inspector"></figure>
+  <div>
+    <p>The inspector edits position, size, rotation, opacity and corner radius at the top, then:</p>
+    <dl>
+      <dt>Fill</dt><dd>Any number of fills: solid colors or linear and radial gradients with their own stops. Click a swatch for the color panel; type hex values directly.</dd>
+      <dt>Border</dt><dd>Width, color, position (inside, center, outside), dashes, caps and joins.</dd>
+      <dt>Shadow and Inner Shadow</dt><dd>Offset, blur, spread and color; several can be stacked.</dd>
+      <dt>Effects</dt><dd>Layer blur and blend mode (multiply, screen, overlay…).</dd>
+      <dt>Export</dt><dd>Export sizes and formats for the layer, see <a href="#export">Export</a>.</dd>
+    </dl>
+    <p>Every field takes arithmetic: <code>320/3</code>, <code>+16</code>, <code>*1.5</code>. With several layers selected, a field shows
+    <em>Mixed</em> and typing a value sets it on all of them.</p>
+    <p>The same properties can be typed on the command line: <code>fill #f60</code>, <code>border 2 #000 inside</code>,
+    <code>shadow 0 4 12 #0003</code>, <code>blur 8</code>, <code>blend multiply</code>, <code>op 50</code>, <code>r 12</code>, <code>rot 45</code>.</p>
+  </div>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<section id="text">
+<h2>7. Text</h2>
+<div class="side">
+  <figure class="inspector"><img src="images/inspector-text.png" alt="Text section of the inspector"></figure>
+  <div>
+    <p>Press <kbd>T</kbd> and click to type, or drag to make a text box of a fixed width. Double-click or <kbd>↩</kbd> on a text layer
+    edits it; <kbd>esc</kbd> ends editing.</p>
+    <ul>
+      <li>Styles apply to the selected characters while typing, or to whole layers otherwise: <kbd>⌘B</kbd> bold, <kbd>⌘I</kbd> italic,
+      <kbd>⌘U</kbd> underline, <kbd>⌘T</kbd> the font panel.</li>
+      <li>The inspector sets font family, weight, size, color, letter spacing, line height and alignment.</li>
+      <li><b>Auto Width</b> grows with the text, <b>Auto Height</b> wraps at a fixed width, <b>Fixed Size</b> keeps both.</li>
+      <li>Command line: <code>font Inter 16 600</code>, <code>font bold</code>, <code>fs 18</code>, <code>color #333</code>.</li>
+      <li><kbd>⌘⇧O</kbd> turns text into vector outlines.</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<section id="images">
+<h2>8. Images and cropping</h2>
+<p>Add images with <kbd>I</kbd>, by dragging files onto the canvas, or by pasting. Large images are scaled to fit the artboard they land on;
+<b>Original Size</b> in the inspector restores their natural size. SVG files become editable layers instead of pictures, see
+<a href="#import">Import</a>.</p>
+<h3>Cropping</h3>
+<p>Double-click an image, press <kbd>E</kbd> or click <b>Crop</b> in the inspector. The status bar shows <em>Crop</em>:</p>
+<ul>
+  <li>Drag the edges and corners to crop; the picture stays where it is (<kbd>⇧</kbd> keeps the proportions, <kbd>⌥</kbd> crops from the center).</li>
+  <li>Drag inside the image, or use the arrow keys, to slide the picture under the crop.</li>
+  <li>The hidden parts show faintly with a dashed outline while cropping.</li>
+  <li><kbd>esc</kbd> or <kbd>↩</kbd> finishes. The whole crop is one undo step. <b>Reset Crop</b> shows the whole image again.</li>
+</ul>
+<figure class="wide"><img src="images/crop.png" alt="Cropping an image"><figcaption>Cropping: the solid frame is what shows, the dashed one is the whole image.</figcaption></figure>
+</section>
+
+<!-- ===================================================================== -->
+<section id="vectors">
+<h2>9. Paths, booleans and masks</h2>
+<h3>The pen</h3>
+<p>Press <kbd>P</kbd>. Click to add corner points, drag to add curve points, click the first point to close the path,
+<kbd>↩</kbd> or <kbd>esc</kbd> to finish it open, <kbd>⌫</kbd> to remove the last point, <kbd>⇧</kbd> for 45° angles.</p>
+<p class="tip"><b>A straight line after a curve:</b> click the last point again. That removes its outgoing handle, so the next segment is straight.
+To make a sharp turn between two curves, <kbd>⌥</kbd>-drag (or drag from the last point): only the outgoing handle moves.</p>
+<h3>Editing points</h3>
+<div class="side">
+  <figure class="canvas"><img src="images/edit-points.png" alt="Editing points of a path"><figcaption>Circles are curve points, squares are corners.</figcaption></figure>
+  <div>
+    <p>Double-click a shape or press <kbd>E</kbd> (shapes become paths first).</p>
+    <table class="keys">
+      <tr><td><kbd>⇥</kbd> / <kbd>⇧⇥</kbd></td><td>Next / previous point</td></tr>
+      <tr><td>Arrows</td><td>Move the selected points</td></tr>
+      <tr><td><kbd>1</kbd>–<kbd>4</kbd></td><td>Straight, mirrored, asymmetric, disconnected</td></tr>
+      <tr><td><kbd>⌫</kbd></td><td>Delete the selected points</td></tr>
+      <tr><td>Click a segment</td><td>Add a point there</td></tr>
+      <tr><td><kbd>esc</kbd></td><td>Done</td></tr>
+    </table>
+  </div>
+</div>
+<h3>Combining shapes</h3>
+<table class="keys">
+  <tr><td><kbd>⌘⌥U</kbd> <kbd>⌘⌥S</kbd> <kbd>⌘⌥I</kbd> <kbd>⌘⌥X</kbd></td><td>Union, subtract, intersect, difference</td></tr>
+  <tr><td><kbd>⌃⌘M</kbd></td><td>Mask: the bottom selected layer clips the layers above it (one layer: toggle)</td></tr>
+  <tr><td><kbd>⌘⇧O</kbd></td><td>Convert to paths (text to outlines)</td></tr>
+  <tr><td><kbd>⌘⌥O</kbd></td><td>Outline stroke: turn a border into a filled shape</td></tr>
+</table>
+</section>
+
+<!-- ===================================================================== -->
+<section id="symbols">
+<h2>10. Symbols, shared styles and colors</h2>
+<h3>Symbols</h3>
+<div class="side">
+  <figure class="inspector"><img src="images/inspector-symbol.png" alt="Symbol instance in the inspector"></figure>
+  <div>
+    <p><kbd>⌥⌘K</kbd> turns the selection into a symbol. Its <em>master</em> moves to the <b>Symbols</b> page and an <em>instance</em>
+    takes its place. A single artboard becomes a symbol where it is.</p>
+    <ul>
+      <li>Edit the master and every instance follows.</li>
+      <li><kbd>S</kbd> inserts a symbol, picked from a searchable list.</li>
+      <li>In an instance, the inspector's <b>Overrides</b> change texts, colors, nested symbols and visibility for that instance only.</li>
+      <li><kbd>g s</kbd> or a double-click goes to the master; <kbd>⌥⌘B</kbd> detaches an instance into a plain group.</li>
+      <li>Resizing an instance lays out the master's layers by their <a href="#layout">constraints</a>: a wider button keeps its label size.</li>
+      <li>Deleting a master turns its instances into groups; copying an instance into another document brings its master along.</li>
+    </ul>
+  </div>
+</div>
+<h3>Shared styles and the color palette</h3>
+<div class="side">
+  <figure class="inspector"><img src="images/inspector-assets.png" alt="Colors and shared styles"></figure>
+  <div>
+    <p>The style menu at the top of the inspector creates a <b>shared style</b> from a layer and applies existing ones (<kbd>⌘⇧Y</kbd>).
+    When a linked layer is changed by hand it shows <em>modified</em>, with <b>Update Style from Layer</b> (changes every layer using
+    the style) and <b>Reset to Style</b>. Text layers get text styles: font, size, color, spacing and alignment.</p>
+    <p>With nothing selected, the inspector shows the document's <b>colors</b> and shared styles. Add colors with <b>+</b> or
+    <b>Symbols → Add Color to Palette</b>; rename them in place. <kbd>C</kbd> applies a palette color to the selection, and the
+    command line takes <code>$name</code> wherever a color goes: <code>fill $brand</code>, <code>border 2 $ink</code>.</p>
+  </div>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<section id="layout">
+<h2>11. Layout: align, constraints and stacks</h2>
+<h3>Align and distribute</h3>
+<div class="side">
+  <figure class="inspector"><img src="images/inspector-align.png" alt="Align buttons and spacing"></figure>
+  <div>
+    <p>The row at the top of the inspector aligns the selected layers to each other; a single layer aligns to its artboard.</p>
+    <table class="keys">
+      <tr><td><kbd>⌥A</kbd> <kbd>⌥H</kbd> <kbd>⌥D</kbd></td><td>Align left, horizontal centers, right</td></tr>
+      <tr><td><kbd>⌥W</kbd> <kbd>⌥V</kbd> <kbd>⌥S</kbd></td><td>Align top, vertical centers, bottom</td></tr>
+      <tr><td><kbd>⌃⌥H</kbd> <kbd>⌃⌥V</kbd></td><td>Distribute evenly (three or more layers)</td></tr>
+    </table>
+    <p><b>Spacing:</b> the ↔ and ↕ fields show the gap between the selected layers when it is the same everywhere. Type a number to
+    line them up exactly that far apart, starting from the first one; this works with two layers too.
+    Command line: <code>distribute h 16</code>, <code>align center</code>.</p>
+  </div>
+</div>
+<h3>Constraints (Resizing)</h3>
+<p>For layers inside an artboard or symbol, the <b>Resizing</b> section says how a layer follows when its parent changes size:
+<b>Left</b>, <b>Right</b>, <b>Left &amp; Right</b> (stretch), <b>Center</b> or <b>Scale</b>, and the same vertically.
+Command line: <code>pin left right</code>, <code>pin bottom</code>, <code>pin hcenter vscale</code>.</p>
+<h3>Stacks (auto layout)</h3>
+<div class="side">
+  <figure class="inspector"><img src="images/inspector-stack.png" alt="Stack section"></figure>
+  <div>
+    <p><kbd>⇧A</kbd> puts the selected layers in a <b>stack</b>: a row or column with a gap, padding and alignment, picked from how they are
+    arranged. A selected group or artboard becomes a stack itself. <kbd>⌥⇧A</kbd> removes the stack.</p>
+    <ul>
+      <li><b>Hug</b> sizes the stack to its contents; <b>Fixed</b> keeps its size.</li>
+      <li>Reordering layers reorders the stack, and text that grows pushes its neighbours.</li>
+      <li>Command line: <code>stack h 8 12 center</code> (direction, gap, padding, alignment), <code>stack v 16 fixed</code>,
+      <code>stack off</code>, <code>gap 12</code>, <code>pad 8 16</code>.</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<section id="pages">
+<h2>12. Pages</h2>
+<table class="keys">
+  <tr><td><kbd>⌘⌥N</kbd></td><td>New page</td></tr>
+  <tr><td><kbd>fn↓</kbd> / <kbd>fn↑</kbd></td><td>Next / previous page</td></tr>
+  <tr><td><kbd>g p</kbd></td><td>Go to a page by name</td></tr>
+  <tr><td><kbd>g m</kbd></td><td>Move the selection to another page</td></tr>
+</table>
+<p>Double-click a page in the list to rename it. Each page remembers where you were looking.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section id="commandline">
+<h2>13. Command line reference</h2>
+<p>Press <kbd>:</kbd>, type one or more commands separated by <code>;</code> and press <kbd>↩</kbd>. Commands apply to every selected layer;
+numbers like <code>+20</code> or <code>*2</code> change each layer's own value. <kbd>.</kbd> repeats the last line.</p>
+<table class="reference">
+  <thead><tr><th>Command</th><th>Examples</th><th>What it does</th></tr></thead>
+  <tbody>
+  <tr><td><code>x</code> <code>y</code> <code>w</code> <code>h</code></td><td><code>x 100</code>, <code>w +20</code>, <code>h *2</code></td><td>Position and size</td></tr>
+  <tr><td><code>size</code>, <code>pos</code></td><td><code>size 200x120 @ 40,80</code>, <code>size iphone</code>, <code>pos 0,0</code></td><td>Frame, as in the size prompt</td></tr>
+  <tr><td><code>r</code></td><td><code>r 8</code></td><td>Corner radius</td></tr>
+  <tr><td><code>rot</code></td><td><code>rot 45</code></td><td>Rotation in degrees</td></tr>
+  <tr><td><code>op</code></td><td><code>op 50</code></td><td>Opacity in percent</td></tr>
+  <tr><td><code>fill</code></td><td><code>fill #ff6600</code>, <code>fill $brand</code>, <code>fill none</code></td><td>First fill</td></tr>
+  <tr><td><code>border</code></td><td><code>border 2 #000 inside</code>, <code>border none</code></td><td>Border width, color and position</td></tr>
+  <tr><td><code>shadow</code></td><td><code>shadow 0 4 12 #0003</code>, <code>shadow 0 8 24 4 $ink</code></td><td>Drop shadow: x y blur [spread] [color]</td></tr>
+  <tr><td><code>blur</code></td><td><code>blur 8</code>, <code>blur none</code></td><td>Layer blur</td></tr>
+  <tr><td><code>blend</code></td><td><code>blend multiply</code></td><td>Blend mode</td></tr>
+  <tr><td><code>name</code></td><td><code>name Header</code></td><td>Rename</td></tr>
+  <tr><td><code>font</code></td><td><code>font Inter 16 600</code>, <code>font bold</code>, <code>font 18</code></td><td>Font family, size and weight</td></tr>
+  <tr><td><code>fs</code>, <code>color</code></td><td><code>fs 18</code>, <code>color #333</code></td><td>Font size, text color</td></tr>
+  <tr><td><code>align</code></td><td><code>align left</code>, <code>center</code>, <code>right</code>, <code>top</code>, <code>middle</code>, <code>bottom</code></td><td>Align the selection</td></tr>
+  <tr><td><code>distribute</code></td><td><code>distribute h</code>, <code>distribute v 16</code></td><td>Even spacing, or an exact gap</td></tr>
+  <tr><td><code>style</code></td><td><code>style Card</code></td><td>Apply a shared style</td></tr>
+  <tr><td><code>stack</code></td><td><code>stack h 8 16 center</code>, <code>stack v 12 fixed</code>, <code>stack off</code></td><td>Stack layout</td></tr>
+  <tr><td><code>gap</code>, <code>pad</code></td><td><code>gap 12</code>, <code>pad 8 16</code>, <code>pad 8 16 4 16</code></td><td>Stack gap and padding (CSS order)</td></tr>
+  <tr><td><code>pin</code></td><td><code>pin left right</code>, <code>pin bottom</code>, <code>pin hcenter vscale</code></td><td>Constraints</td></tr>
+  <tr><td><code>hide</code> <code>show</code> <code>lock</code> <code>unlock</code></td><td></td><td>Visibility and locking</td></tr>
+  <tr><td><code>group</code> <code>ungroup</code> <code>duplicate</code> <code>delete</code></td><td></td><td>The same as their shortcuts</td></tr>
+  <tr><td><code>front</code> <code>back</code> <code>forward</code> <code>backward</code></td><td></td><td>Layer order</td></tr>
+  <tr><td><code>bool</code></td><td><code>bool union</code>, <code>subtract</code>, <code>intersect</code>, <code>difference</code></td><td>Combine shapes</td></tr>
+  <tr><td><code>mask</code> <code>flatten</code> <code>outline</code></td><td></td><td>Mask, convert to paths, outline stroke</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ===================================================================== -->
+<section id="export">
+<h2>14. Export</h2>
+<div class="side">
+  <figure class="inspector"><img src="images/inspector-export.png" alt="Export section"></figure>
+  <div>
+    <p>Give a layer export sizes in the inspector's <b>Export</b> section: <code>1x</code>, <code>2x</code>, <code>512w</code> or <code>300h</code>,
+    each with a suffix and a format: PNG, JPG, WebP, HEIC, AVIF, PDF or SVG.</p>
+    <table class="keys">
+      <tr><td><kbd>⌘⇧E</kbd></td><td>Export the selection (layers without sizes as a 1x PNG)</td></tr>
+      <tr><td><kbd>⌘⌥⇧E</kbd></td><td>Export every layer marked for export</td></tr>
+      <tr><td><kbd>⌘⇧C</kbd></td><td>Copy the selection as a 2x PNG</td></tr>
+      <tr><td><kbd>⌘⌥⇧C</kbd></td><td>Copy the selection as SVG</td></tr>
+    </table>
+    <p><b>Export → Export Page as PDF…</b> writes the page's artboards as pages of one PDF; shapes and text stay vectors.
+    Layer names with <code>/</code> become folders: <code>Icons/Home</code> exports as <code>Icons/Home@2x.png</code>.</p>
+    <p>SVG export writes real <code>rect</code>, <code>ellipse</code>, <code>path</code> and <code>text</code> elements with gradients, clip paths,
+    masks and filters for shadows and blur.</p>
+  </div>
+</div>
+</section>
+
+<!-- ===================================================================== -->
+<section id="import">
+<h2>15. Import: SVG, Sketch and Figma</h2>
+<h3>SVG</h3>
+<p>Paste SVG (copied as an image, or as markup from a code editor, a website or Figma's <em>Copy as SVG</em>), drop <code>.svg</code> files on the
+canvas, or add them with <kbd>I</kbd>. They arrive as editable groups of shapes, paths and text. Opening a <code>.svg</code> file puts it on an
+artboard of its size. Gradients, strokes, opacity, CSS classes, transforms and <code>&lt;use&gt;</code> come along; clip paths, masks, filters and
+patterns are skipped.</p>
+<figure class="wide"><img src="images/svg-paste.png" alt="A pasted SVG icon"><figcaption>An icon pasted as SVG markup becomes a group of editable paths.</figcaption></figure>
+<h3>Sketch</h3>
+<p>Open <code>.sketch</code> files with <kbd>⌘O</kbd>, a double-click in Finder or by dropping them on the Dock icon. The file opens as a new, unsaved
+Skica document; the Sketch file itself is never changed. Pages, artboards and Sketch 2025 frames, groups, shapes, boolean shape groups,
+text with its styles, images, symbols with overrides, shared styles, colors, constraints and export presets are kept.</p>
+<figure class="wide"><img src="images/sketch-import.png" alt="A Sketch file opened in Skica"><figcaption>Sketch's own template library opened in Skica.</figcaption></figure>
+<h3>Figma</h3>
+<p><b>File → Import from Figma…</b> (<kbd>⌃⌘O</kbd>) asks for a file link and a <em>personal access token</em>
+(Figma → Settings → Security → Personal access tokens, with read access to files). The token can be remembered in
+<code>~/.config/skica/figma-token</code>, readable only by you; the <code>FIGMA_TOKEN</code> environment variable works too.</p>
+<p>Frames, groups, vectors, text with its styles, image fills, components (as symbols) and instances with their text, color, visibility and swap
+overrides come along, as do auto layout (as stacks), constraints, effects and export settings. Instances of components from libraries that are
+not in the file arrive as groups.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section id="cli">
+<h2>16. The <code>skica</code> command</h2>
+<p>Homebrew installs it; otherwise use <b>Skica → Install Command Line Tool…</b>. It reads <code>.skica</code>, <code>.sketch</code> and <code>.svg</code> files.</p>
+<pre><code>skica list Design.skica                                  # pages, artboards, export presets
+skica export Design.skica -o out -f png -s 2x            # every artboard
+skica export Design.skica -a "Home" -a "Settings" -f svg  # some artboards
+skica export Design.skica -p "Icons"                     # artboards of one page
+skica export Design.skica --exportables                  # marked layers, with their own sizes
+skica export Design.skica --single-pdf Design.pdf        # all artboards in one PDF
+skica export Design.sketch -o out                        # straight from Sketch files
+skica import Design.sketch Design.skica                  # convert Sketch or SVG files
+skica import https://www.figma.com/design/KEY/Name Design.skica   # needs FIGMA_TOKEN
+skica shortcuts                                          # every command and its keys
+skica sample Sample.skica                                # a document to try things on</code></pre>
+<p>Formats for <code>-f</code>: png, jpg, webp, heic, avif, pdf, svg. Sizes for <code>-s</code>: <code>2x</code>, <code>0.5x</code>, <code>512w</code>, <code>300h</code>.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section id="customize">
+<h2>17. Custom shortcuts</h2>
+<p>Shortcuts live in <code>~/.config/skica/keybindings.json</code>. Choose a preset (<code>sketch</code>, the default, or <code>figma</code>)
+and override single commands; only overrides are stored:</p>
+<pre><code>{
+  "preset": "figma",
+  "bindings": {
+    "zoomIn": ["cmd+="],
+    "goToPage": ["g p", "ctrl+p"]
+  }
+}</code></pre>
+<p>Keys are written as <code>cmd</code>, <code>opt</code>, <code>ctrl</code>, <code>shift</code> joined with <code>+</code>; a space separates the keys of a
+sequence (<code>g p</code>). Command names are the identifiers in the table below (run <code>skica shortcuts</code> to list them with their keys).
+Restart Skica after editing; problems with the file are reported at launch.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section id="shortcuts">
+<h2>18. All shortcuts</h2>
+<p>The default (Sketch) shortcuts, and the Figma preset where it differs. Commands without a shortcut are in <kbd>⌘P</kbd>.</p>
+<!-- shortcuts:start -->
+<table class="shortcuts">
+<thead><tr><th>Command</th><th>Keys</th><th>Figma preset</th></tr></thead>
+<tbody><tr class="category"><th colspan="3">Tools</th></tr>
+<tr><td>Select Tool</td><td><kbd>V</kbd></td><td></td></tr>
+<tr><td>Rectangle</td><td><kbd>R</kbd></td><td></td></tr>
+<tr><td>Oval</td><td><kbd>O</kbd></td><td></td></tr>
+<tr><td>Line</td><td><kbd>L</kbd></td><td></td></tr>
+<tr><td>Polygon</td><td><kbd>Y</kbd></td><td></td></tr>
+<tr><td>Star</td><td><kbd>*</kbd></td><td></td></tr>
+<tr><td>Pen</td><td><kbd>P</kbd></td><td></td></tr>
+<tr><td>Text</td><td><kbd>T</kbd></td><td></td></tr>
+<tr><td>Artboard</td><td><kbd>A</kbd></td><td><kbd>F</kbd> <kbd>A</kbd></td></tr>
+<tr><td>Image…</td><td><kbd>I</kbd></td><td></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">Edit</th></tr>
+<tr><td>Edit Size and Position…</td><td><kbd>=</kbd></td><td></td></tr>
+<tr><td>Delete</td><td><kbd>⌫</kbd> <kbd>⌦</kbd></td><td></td></tr>
+<tr><td>Duplicate</td><td><kbd>⌘D</kbd></td><td></td></tr>
+<tr><td>Select All</td><td><kbd>⌘A</kbd></td><td></td></tr>
+<tr><td>Rename</td><td><kbd>⌘R</kbd></td><td></td></tr>
+<tr><td>Show/Hide</td><td><kbd>⇧⌘H</kbd></td><td></td></tr>
+<tr><td>Lock/Unlock</td><td><kbd>⇧⌘L</kbd></td><td></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">Arrange</th></tr>
+<tr><td>Bring Forward</td><td><kbd>⌘]</kbd></td><td></td></tr>
+<tr><td>Send Backward</td><td><kbd>⌘[</kbd></td><td></td></tr>
+<tr><td>Bring to Front</td><td><kbd>⌥⌘]</kbd></td><td></td></tr>
+<tr><td>Send to Back</td><td><kbd>⌥⌘[</kbd></td><td></td></tr>
+<tr><td>Group</td><td><kbd>⌘G</kbd></td><td></td></tr>
+<tr><td>Ungroup</td><td><kbd>⇧⌘G</kbd></td><td></td></tr>
+<tr><td>Add Stack</td><td><kbd>⇧A</kbd></td><td></td></tr>
+<tr><td>Remove Stack</td><td><kbd>⌥⇧A</kbd></td><td></td></tr>
+<tr><td>Align Left</td><td><kbd>⌥A</kbd></td><td></td></tr>
+<tr><td>Align Horizontal Centers</td><td><kbd>⌥H</kbd></td><td></td></tr>
+<tr><td>Align Right</td><td><kbd>⌥D</kbd></td><td></td></tr>
+<tr><td>Align Top</td><td><kbd>⌥W</kbd></td><td></td></tr>
+<tr><td>Align Vertical Centers</td><td><kbd>⌥V</kbd></td><td></td></tr>
+<tr><td>Align Bottom</td><td><kbd>⌥S</kbd></td><td></td></tr>
+<tr><td>Distribute Horizontally</td><td><kbd>⌃⌥H</kbd></td><td></td></tr>
+<tr><td>Distribute Vertically</td><td><kbd>⌃⌥V</kbd></td><td></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">Selection</th></tr>
+<tr><td>Select Next Layer</td><td><kbd>⇥</kbd></td><td></td></tr>
+<tr><td>Select Previous Layer</td><td><kbd>⇧⇥</kbd></td><td></td></tr>
+<tr><td>Select Inside / Edit Size</td><td><kbd>↩</kbd></td><td></td></tr>
+<tr><td>Back / Select Parent</td><td><kbd>esc</kbd></td><td></td></tr>
+<tr><td>Select by Label</td><td><kbd>F</kbd></td><td><kbd>G F</kbd></td></tr>
+<tr><td>Add to Selection by Label</td><td><kbd>⇧F</kbd></td><td><kbd>G ⇧F</kbd></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">Pages</th></tr>
+<tr><td>New Page</td><td><kbd>⌥⌘N</kbd></td><td></td></tr>
+<tr><td>Delete Page</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Rename Page</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Next Page</td><td><kbd>⇟</kbd></td><td></td></tr>
+<tr><td>Previous Page</td><td><kbd>⇞</kbd></td><td></td></tr>
+<tr><td>Go to Page…</td><td><kbd>G P</kbd></td><td></td></tr>
+<tr><td>Move Selection to Page…</td><td><kbd>G M</kbd></td><td></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">Export</th></tr>
+<tr><td>Export Selection…</td><td><kbd>⇧⌘E</kbd></td><td></td></tr>
+<tr><td>Export All Marked Layers…</td><td><kbd>⌥⇧⌘E</kbd></td><td></td></tr>
+<tr><td>Export Page as PDF…</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Copy as PNG</td><td><kbd>⇧⌘C</kbd></td><td></td></tr>
+<tr><td>Copy as SVG</td><td><kbd>⌥⇧⌘C</kbd></td><td></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">Text</th></tr>
+<tr><td>Bold</td><td><kbd>⌘B</kbd></td><td></td></tr>
+<tr><td>Italic</td><td><kbd>⌘I</kbd></td><td></td></tr>
+<tr><td>Underline</td><td><kbd>⌘U</kbd></td><td></td></tr>
+<tr><td>Font…</td><td><kbd>⌘T</kbd></td><td></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">Vector</th></tr>
+<tr><td>Edit Points</td><td><kbd>E</kbd></td><td></td></tr>
+<tr><td>Convert to Paths</td><td><kbd>⇧⌘O</kbd></td><td></td></tr>
+<tr><td>Outline Stroke</td><td><kbd>⌥⌘O</kbd></td><td></td></tr>
+<tr><td>Union</td><td><kbd>⌥⌘U</kbd></td><td></td></tr>
+<tr><td>Subtract</td><td><kbd>⌥⌘S</kbd></td><td></td></tr>
+<tr><td>Intersect</td><td><kbd>⌥⌘I</kbd></td><td></td></tr>
+<tr><td>Difference</td><td><kbd>⌥⌘X</kbd></td><td></td></tr>
+<tr><td>Mask</td><td><kbd>⌃⌘M</kbd></td><td></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">Symbols & Styles</th></tr>
+<tr><td>Create Symbol…</td><td><kbd>⌥⌘K</kbd></td><td></td></tr>
+<tr><td>Insert Symbol…</td><td><kbd>S</kbd></td><td></td></tr>
+<tr><td>Swap Symbol…</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Go to Symbol Master</td><td><kbd>G S</kbd></td><td></td></tr>
+<tr><td>Detach from Symbol</td><td><kbd>⌥⌘B</kbd></td><td></td></tr>
+<tr><td>Reset Overrides</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Create Shared Style…</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Apply Shared Style…</td><td><kbd>⇧⌘Y</kbd></td><td></td></tr>
+<tr><td>Update Shared Style from Layer</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Reset to Shared Style</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Detach from Shared Style</td><td><span class="none">⌘P</span></td><td></td></tr>
+<tr><td>Apply Color from Palette…</td><td><kbd>C</kbd></td><td></td></tr>
+<tr><td>Add Color to Palette</td><td><span class="none">⌘P</span></td><td></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">View</th></tr>
+<tr><td>Zoom In</td><td><kbd>⌘=</kbd> <kbd>⇧⌘+</kbd></td><td><kbd>+</kbd> <kbd>⌘=</kbd> <kbd>⇧⌘+</kbd></td></tr>
+<tr><td>Zoom Out</td><td><kbd>⌘-</kbd></td><td><kbd>-</kbd> <kbd>⌘-</kbd></td></tr>
+<tr><td>Actual Size</td><td><kbd>⌘0</kbd></td><td><kbd>⌘0</kbd> <kbd>)</kbd></td></tr>
+<tr><td>Zoom to Fit</td><td><kbd>⌘1</kbd></td><td><kbd>⌘1</kbd> <kbd>!</kbd></td></tr>
+<tr><td>Zoom to Selection</td><td><kbd>⌘2</kbd></td><td><kbd>⌘2</kbd> <kbd>@</kbd></td></tr>
+<tr><td>Show/Hide Layers</td><td><kbd>⌥⌘1</kbd></td><td></td></tr>
+<tr><td>Show/Hide Inspector</td><td><kbd>⌥⌘2</kbd></td><td></td></tr>
+<tr><td>Canvas Only</td><td><kbd>⌘.</kbd></td><td><kbd>⌘\</kbd> <kbd>⌘.</kbd></td></tr>
+</tbody>
+<tbody><tr class="category"><th colspan="3">App</th></tr>
+<tr><td>Go to Layers</td><td><kbd>G L</kbd></td><td></td></tr>
+<tr><td>Go to Inspector</td><td><kbd>G I</kbd></td><td></td></tr>
+<tr><td>Command Palette</td><td><kbd>⌘P</kbd> <kbd>⇧⌘P</kbd></td><td></td></tr>
+<tr><td>Actions for Selection</td><td><kbd>⌘K</kbd></td><td></td></tr>
+<tr><td>Keyboard Shortcuts</td><td><kbd>?</kbd></td><td></td></tr>
+<tr><td>Command Line</td><td><kbd>:</kbd></td><td></td></tr>
+<tr><td>Repeat Last Command</td><td><kbd>.</kbd></td><td></td></tr>
+</tbody>
+</table>
+
+<!-- shortcuts:end -->
+<h3>Mouse and modes</h3>
+<table class="keys">
+  <tr><td>Double-click</td><td>Into a group; edit text; edit points of a shape; crop an image; go to a symbol's master</td></tr>
+  <tr><td><kbd>⌘</kbd>-click</td><td>Select the deepest layer under the pointer</td></tr>
+  <tr><td><kbd>space</kbd> + drag</td><td>Pan</td></tr>
+  <tr><td><kbd>⇧</kbd> / <kbd>⌥</kbd> / <kbd>⌃</kbd> while dragging</td><td>Keep proportions / from the center / no snapping</td></tr>
+  <tr><td>Pen: click last point again</td><td>Next segment straight after a curve</td></tr>
+  <tr><td>Pen: <kbd>⌥</kbd>-drag</td><td>Sharp turn between two curves</td></tr>
+  <tr><td>Drag rows in the layers list</td><td>Reorder; move into or out of groups and artboards</td></tr>
+  <tr><td>Drag a panel divider</td><td>Resize the layers list or the inspector</td></tr>
+</table>
+</section>
+
+<!-- ===================================================================== -->
+<section id="files">
+<h2>19. Files and Quick Look</h2>
+<p>A <code>.skica</code> file is a zip archive with <code>document.json</code> (pages, layers, styles, symbols) and the images in
+<code>images/</code>, named by their SHA-256 hash, so the same image is stored once. Documents save automatically, as in other Mac apps,
+and keep a full undo history while open.</p>
+<p>Finder shows thumbnails of <code>.skica</code> files, and the space bar opens a Quick Look preview of the first page. Both come from
+extensions inside Skica.app; open the app once after installing so macOS registers them.</p>
+</section>
+
+<footer>Skica · generated from the app itself by <code>scripts/make-manual.sh</code></footer>
+</main>
+</body>
+</html>
