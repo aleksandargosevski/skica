@@ -40,7 +40,10 @@ import UniformTypeIdentifiers
         }
         let perFrame = elapsed / runs
         print("5,000 layers: \(perFrame) per frame")
-        #expect(perFrame < .milliseconds(100))
+        // CI runners are shared virtual machines without a real GPU; there the budget only
+        // catches large regressions.
+        let budget: Duration = ProcessInfo.processInfo.environment["CI"] == nil ? .milliseconds(100) : .milliseconds(400)
+        #expect(perFrame < budget)
     }
 
     @Test func skipsHiddenLayers() throws {
