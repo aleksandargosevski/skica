@@ -26,7 +26,7 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSSp
     init(editor: DocumentEditor) {
         self.editor = editor
         canvas = CanvasView(editor: editor, state: state)
-        layersPanel = LayersPanel(editor: editor)
+        layersPanel = LayersPanel(editor: editor, state: state)
 
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1440, height: 900),
@@ -40,6 +40,8 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSSp
 
         window.delegate = self
         window.contentView = makeContentView()
+        canvas.onIsolationChange = { [weak self] in self?.layersPanel.isolationChanged() }
+        layersPanel.onToggleIsolation = { [weak self] in self?.perform(.toggleIsolation) }
         canvas.onDropImages = { [weak self] files, data, point in
             if !files.isEmpty {
                 self?.insertImages(at: point, urls: files)
@@ -116,6 +118,7 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSSp
         case .toggleLayers: setPanel(layersPanel.view, visible: layersPanel.view.isHidden)
         case .toggleInspector: setPanel(inspector, visible: inspector.isHidden)
         case .toggleZen: toggleZen()
+        case .toggleIsolation: canvas.toggleIsolation()
         case .focusLayers: focusLayers()
         case .focusInspector: focusInspector()
         case .toggleBold: toggleFontTrait(.boldFontMask, name: "Bold")
@@ -681,6 +684,10 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSSp
             if command == .toggleInspector { menuItem.title = inspector.isHidden ? "Show Inspector" : "Hide Inspector" }
             if menuItem.representedObject as? String == editor.tool.commandID?.rawValue { menuItem.state = .on } else if command.category == .tools { menuItem.state = .off }
             if command == .deletePage { return editor.document.pages.count > 1 }
+            if command == .toggleIsolation {
+                menuItem.state = state.isolation != nil ? .on : .off
+                return state.isolation != nil || !editor.selection.isEmpty
+            }
             return !command.needsSelection || !editor.selection.isEmpty
         default:
             return true
@@ -691,6 +698,7 @@ final class DocumentWindowController: NSWindowController, NSWindowDelegate, NSSp
 
     func windowDidResignKey(_ notification: Notification) {
         canvas.isSpaceHeld = false
+        canvas.isOptionHeld = false
         state.pendingKeys = []
     }
 
@@ -832,6 +840,7 @@ extension CommandID {
         case .zoomActualSize, .zoomToFit: "arrow.up.left.and.arrow.down.right"
         case .toggleLayers: "sidebar.left"
         case .toggleInspector: "sidebar.right"
+        case .toggleIsolation: "line.3.horizontal.decrease.circle"
         case .showShortcuts: "keyboard"
         case .commandLine: "terminal"
         case .repeatCommand: "repeat"

@@ -18,6 +18,7 @@ struct CanvasOverlay {
     let pathEdit: PathEditState?
     /// While cropping: the crop and the whole image, in page coordinates.
     var crop: (frame: CGRect, image: CGRect)?
+    var distances: MeasuredDistances?
 
     static let guideColor = NSColor(srgbRed: 1, green: 0.23, blue: 0.42, alpha: 1)
 
@@ -44,6 +45,7 @@ struct CanvasOverlay {
             if showsHandles { drawHandles(viewBox) }
             drawSizeLabel(for: box, below: viewBox)
         }
+        if let distances { drawDistances(distances) }
         if !guides.isEmpty {
             let path = NSBezierPath()
             for guide in guides {
@@ -157,6 +159,61 @@ struct CanvasOverlay {
         Self.guideColor.setStroke()
         path.lineWidth = 1
         path.stroke()
+    }
+
+    // MARK: Distances
+
+    /// The target outlined, a line with end ticks and a label for each distance, and dashed
+    /// lines carrying measurements over to the target.
+    private func drawDistances(_ measured: MeasuredDistances) {
+        let color = Self.guideColor
+        color.setStroke()
+        let target = NSBezierPath(rect: viewport.toView(measured.target).integral.insetBy(dx: 0.5, dy: 0.5))
+        target.lineWidth = 1
+        target.stroke()
+
+        let extensions = NSBezierPath()
+        for line in measured.distances.extensions {
+            extensions.move(to: viewport.toView(line.start).pixelAligned)
+            extensions.line(to: viewport.toView(line.end).pixelAligned)
+        }
+        extensions.setLineDash([3, 3], count: 2, phase: 0)
+        extensions.lineWidth = 1
+        extensions.stroke()
+
+        for line in measured.distances.lines {
+            let start = viewport.toView(line.start).pixelAligned
+            let end = viewport.toView(line.end).pixelAligned
+            let isHorizontal = line.start.y == line.end.y
+            let path = NSBezierPath()
+            path.move(to: start)
+            path.line(to: end)
+            for point in [start, end] {
+                let tick = CGVector(dx: isHorizontal ? 0 : 3, dy: isHorizontal ? 3 : 0)
+                path.move(to: CGPoint(x: point.x - tick.dx, y: point.y - tick.dy))
+                path.line(to: CGPoint(x: point.x + tick.dx, y: point.y + tick.dy))
+            }
+            path.lineWidth = 1
+            path.stroke()
+            drawDistanceLabel(Self.format(line.value), at: CGPoint(x: (start.x + end.x) / 2, y: (start.y + end.y) / 2), beside: isHorizontal)
+        }
+    }
+
+    /// A label centered on a line's middle: below horizontal lines, beside vertical ones.
+    private func drawDistanceLabel(_ text: String, at middle: CGPoint, beside isHorizontal: Bool) {
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .medium),
+            .foregroundColor: NSColor.white,
+        ]
+        let size = (text as NSString).size(withAttributes: attributes)
+        let pillSize = CGSize(width: size.width + 8, height: size.height + 2)
+        let origin = isHorizontal
+            ? CGPoint(x: middle.x - pillSize.width / 2, y: middle.y + 4)
+            : CGPoint(x: middle.x + 4, y: middle.y - pillSize.height / 2)
+        let pill = CGRect(origin: origin, size: pillSize)
+        Self.guideColor.setFill()
+        NSBezierPath(roundedRect: pill, xRadius: 3, yRadius: 3).fill()
+        (text as NSString).draw(at: CGPoint(x: pill.minX + 4, y: pill.minY + 1), withAttributes: attributes)
     }
 
     private func drawHints() {
@@ -274,6 +331,12 @@ struct CanvasOverlay {
     static func format(_ value: CGFloat) -> String {
         value.rounded() == value ? String(Int(value)) : String(format: "%.1f", value)
     }
+}
+
+/// What ⌥ measures to, in page coordinates.
+struct MeasuredDistances {
+    let target: CGRect
+    let distances: Distances
 }
 
 extension CGPoint {

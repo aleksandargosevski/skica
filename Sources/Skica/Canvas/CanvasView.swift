@@ -10,6 +10,20 @@ final class CanvasView: NSView {
     var isSpaceHeld = false {
         didSet { if isSpaceHeld != oldValue { updateCursor() } }
     }
+    /// While ⌥ is held, distances from the selection to the hovered layer are shown.
+    var isOptionHeld = false {
+        didSet { if isOptionHeld != oldValue { overlayLayer.needsDisplay = true } }
+    }
+
+    /// The document as drawn and clicked: with "Show Only Selection", the other layers hidden.
+    var shownDocument: Document {
+        guard let isolation = state.isolation else { return editor.document }
+        if let isolatedDocument { return isolatedDocument }
+        let shown = isolation.apply(to: editor.document)
+        isolatedDocument = shown
+        return shown
+    }
+    private var isolatedDocument: Document?
 
     private(set) var viewport = Viewport() {
         didSet {
@@ -190,7 +204,7 @@ final class CanvasView: NSView {
 
     func beginHints(adding: Bool) {
         let area = viewport.toCanvas(bounds)
-        let targets = HintLabels.targets(on: editor.page, in: editor.document, selection: editor.selection, area: area)
+        let targets = HintLabels.targets(on: editor.page, in: shownDocument, selection: editor.selection, area: area)
         guard !targets.isEmpty else { return NSSound.beep() }
         hints = Hints(labels: Array(zip(HintLabels.labels(count: targets.count), targets)).map { ($0.0, $0.1) }, adding: adding)
     }
@@ -221,6 +235,32 @@ final class CanvasView: NSView {
         current.typed.removeLast()
         hints = current
     }
+
+    // MARK: Isolation
+
+    /// Shows only the selected layers, or everything again when already isolating.
+    func toggleIsolation() {
+        if state.isolation != nil { return endIsolation() }
+        guard !editor.selection.isEmpty else { return NSSound.beep() }
+        setIsolation(Isolation(keeping: editor.selection, on: editor.page, in: editor.document))
+    }
+
+    func endIsolation() {
+        setIsolation(nil)
+    }
+
+    private func setIsolation(_ isolation: Isolation?) {
+        guard state.isolation != isolation else { return }
+        state.isolation = isolation
+        isolatedDocument = nil
+        hovered = nil
+        contentLayer.needsDisplay = true
+        overlayLayer.needsDisplay = true
+        onIsolationChange?()
+    }
+
+    /// Called when "Show Only Selection" starts or ends, e.g. to refresh the layer list.
+    var onIsolationChange: (() -> Void)?
 
     // MARK: Text editing
 
@@ -266,6 +306,7 @@ final class CanvasView: NSView {
     private func editorChanged(_ change: DocumentEditor.Change) {
         switch change {
         case .document:
+            isolatedDocument = nil
             contentLayer.needsDisplay = true
             overlayLayer.needsDisplay = true
             if let hovered, editor.document.layers[hovered] == nil { self.hovered = nil }
@@ -297,6 +338,7 @@ final class CanvasView: NSView {
             updateCursor()
         case .page:
             hints = nil
+            endIsolation()
             if penSession != nil { finishPen(closed: false) }
             endPathEditing()
             endCropping()
@@ -336,13 +378,13 @@ final class CanvasView: NSView {
         context.saveGState()
         context.scaleBy(x: viewport.zoom, y: viewport.zoom)
         context.translateBy(x: -viewport.origin.x, y: -viewport.origin.y)
-        renderer.draw(page: editor.page, of: editor.document, in: context, visibleRect: viewport.toCanvas(dirtyRect))
+        renderer.draw(page: editor.page, of: shownDocument, in: context, visibleRect: viewport.toCanvas(dirtyRect))
         context.restoreGState()
     }
 
     private func drawOverlay(_ dirtyRect: CGRect) {
         CanvasOverlay(
-            document: editor.document,
+            document: shownDocument,
             page: editor.page,
             selection: editor.selection,
             hovered: interaction.isActive ? nil : hovered,
@@ -353,8 +395,18 @@ final class CanvasView: NSView {
             hints: hints.map { hints in hints.labels.map { (label: $0.label, id: $0.id, typed: hints.typed) } } ?? [],
             pen: penSession,
             pathEdit: pathEdit,
-            crop: cropEdit.flatMap(cropRects)
+            crop: cropEdit.flatMap(cropRects),
+            distances: measuredDistances()
         ).draw()
+    }
+
+    /// While ⌥ is held: the selection's distances to the hovered layer (or to its container).
+    private func measuredDistances() -> MeasuredDistances? {
+        guard isOptionHeld, !interaction.isActive, editor.tool == .select, !isEditingVectors, cropEdit == nil,
+              let selectionBox = shownDocument.worldBounds(of: editor.selection),
+              let target = Distances.target(for: editor.selection, hovered: hovered, in: shownDocument),
+              let targetBox = shownDocument.worldBounds(of: target) else { return nil }
+        return MeasuredDistances(target: targetBox, distances: Distances(from: selectionBox, to: targetBox))
     }
 
     // MARK: Mouse
@@ -367,6 +419,7 @@ final class CanvasView: NSView {
 
     override func mouseMoved(with event: NSEvent) {
         let point = location(of: event)
+        isOptionHeld = event.modifierFlags.contains(.option)
         trackPointer(point)
         if penSession != nil { return penMouseMoved(to: point, modifiers: event.modifierFlags) }
         hovered = editor.tool == .select && !isSpaceHeld ? clickTarget(at: point, deep: event.modifierFlags.contains(.command)) : nil
@@ -443,7 +496,7 @@ final class CanvasView: NSView {
         case .marquee(let start, _, let base):
             interaction = .marquee(start: start, current: world, base: base)
             let rect = CGRect(x: min(start.x, world.x), y: min(start.y, world.y), width: abs(world.x - start.x), height: abs(world.y - start.y))
-            editor.select(base + SelectionRules.marquee(rect, on: editor.page, in: editor.document))
+            editor.select(base + SelectionRules.marquee(rect, on: editor.page, in: shownDocument))
         }
     }
 
@@ -596,7 +649,7 @@ final class CanvasView: NSView {
         prepareSnapping(for: [])
         var world = viewport.toCanvas(point).rounded
         if let snapper, !NSEvent.modifierFlags.contains(.control) { world = snapper.snap(point: world).point }
-        let artboard = tool == .artboard ? nil : editor.document.artboard(at: world, on: editor.pageID)
+        let artboard = tool == .artboard ? nil : shownDocument.artboard(at: world, on: editor.pageID)
         guard let layer = tool.makeLayer(from: world, to: world) else { return }
         let creation = Creation(tool: tool, layerID: layer.id, parent: artboard.map(LayerParent.layer) ?? .page(editor.pageID), start: world, startView: point)
         editor.beginLiveEdit()
@@ -637,7 +690,7 @@ final class CanvasView: NSView {
     /// Collects what the dragged layers can snap to: visible layers at the clickable level.
     private func prepareSnapping(for ids: [LayerID]) {
         let visible = viewport.toCanvas(bounds).insetBy(dx: -bounds.width / viewport.zoom, dy: -bounds.height / viewport.zoom)
-        let targets = Snapper.targets(for: ids, on: editor.page, in: editor.document, area: visible)
+        let targets = Snapper.targets(for: ids, on: editor.page, in: shownDocument, area: visible)
         snapper = Snapper(targets: targets, threshold: 6 / viewport.zoom)
     }
 
@@ -645,19 +698,19 @@ final class CanvasView: NSView {
 
     private func clickTarget(at point: CGPoint, deep: Bool) -> LayerID? {
         if let artboard = artboardTitle(at: point) { return artboard }
-        let tester = HitTester(document: editor.document, tolerance: 4 / viewport.zoom)
+        let tester = HitTester(document: shownDocument, tolerance: 4 / viewport.zoom)
         let path = tester.path(at: viewport.toCanvas(point), on: editor.page)
-        return SelectionRules.clickTarget(path: path, in: editor.document, selection: editor.selection, deep: deep)
+        return SelectionRules.clickTarget(path: path, in: shownDocument, selection: editor.selection, deep: deep)
     }
 
     private func doubleClickTarget(at point: CGPoint) -> LayerID? {
-        let tester = HitTester(document: editor.document, tolerance: 4 / viewport.zoom)
+        let tester = HitTester(document: shownDocument, tolerance: 4 / viewport.zoom)
         let path = tester.path(at: viewport.toCanvas(point), on: editor.page)
-        return SelectionRules.doubleClickTarget(path: path, in: editor.document, selection: editor.selection)
+        return SelectionRules.doubleClickTarget(path: path, in: shownDocument, selection: editor.selection)
     }
 
     private func artboardTitle(at point: CGPoint) -> LayerID? {
-        CanvasOverlay.artboardTitles(document: editor.document, page: editor.page, viewport: viewport)
+        CanvasOverlay.artboardTitles(document: shownDocument, page: editor.page, viewport: viewport)
             .last { $0.rect.contains(point) }?.id
     }
 

@@ -216,6 +216,8 @@ private struct Checkerboard: View {
 struct IconButton: View {
     let symbol: String
     let help: String
+    /// Shown in the accent color, for buttons that toggle a mode.
+    var isOn = false
     let action: () -> Void
 
     @State private var isHovered = false
@@ -224,9 +226,10 @@ struct IconButton: View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(isHovered ? .primary : .secondary)
+                .foregroundStyle(isOn ? AnyShapeStyle(.tint) : isHovered ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
                 .frame(width: 22, height: 22)
-                .background(SwiftUI.Color.primary.opacity(isHovered ? 0.08 : 0), in: RoundedRectangle(cornerRadius: 5))
+                .background(isOn ? AnyShapeStyle(.tint.opacity(0.14)) : AnyShapeStyle(SwiftUI.Color.primary.opacity(isHovered ? 0.08 : 0)),
+                            in: RoundedRectangle(cornerRadius: 5))
                 .contentShape(RoundedRectangle(cornerRadius: 5))
         }
         .buttonStyle(.plain)

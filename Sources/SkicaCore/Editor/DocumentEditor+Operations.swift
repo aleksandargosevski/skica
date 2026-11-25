@@ -26,9 +26,16 @@ extension DocumentEditor {
 
     /// Hides all when any is visible, otherwise shows all.
     public func toggleHidden() {
-        let hide = selectedLayers.contains(where: \.isVisible)
+        toggleHidden(selection)
+    }
+
+    /// Hides all of `ids` when any is visible, otherwise shows all; the selection stays as it is.
+    public func toggleHidden(_ ids: [LayerID]) {
+        let layers = ids.compactMap { document.layers[$0] }
+        guard !layers.isEmpty else { return }
+        let hide = layers.contains(where: \.isVisible)
         perform(hide ? "Hide" : "Show") { transaction in
-            for id in selection { transaction.update(id) { $0.isVisible = !hide } }
+            for layer in layers { transaction.update(layer.id) { $0.isVisible = !hide } }
         }
     }
 

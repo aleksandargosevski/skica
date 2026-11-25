@@ -17,7 +17,7 @@ final class KeyboardRouter {
     }
 
     func install() {
-        monitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { [weak self] event in
+        monitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp, .flagsChanged]) { [weak self] event in
             guard let self else { return event }
             return self.handle(event)
         }
@@ -26,6 +26,10 @@ final class KeyboardRouter {
     private func handle(_ event: NSEvent) -> NSEvent? {
         guard let window = event.window, let controller = window.windowController as? DocumentWindowController else { return event }
 
+        if event.type == .flagsChanged {
+            controller.canvas.isOptionHeld = event.modifierFlags.contains(.option)
+            return event
+        }
         if event.type == .keyUp {
             if event.keyCode == KeyCodes.space { controller.canvas.isSpaceHeld = false }
             return event

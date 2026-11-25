@@ -58,7 +58,7 @@ extension CanvasView {
             session.dragsOutHandleOnly = false
             penSession = session
         } else {
-            let parentID = editor.document.artboard(at: world, on: editor.pageID)
+            let parentID = shownDocument.artboard(at: world, on: editor.pageID)
             penSession = PenSession(layerID: .make(), parent: parentID.map(LayerParent.layer) ?? .page(editor.pageID),
                                     points: [PathPoint(world)], isDragging: true)
             editor.beginLiveEdit()

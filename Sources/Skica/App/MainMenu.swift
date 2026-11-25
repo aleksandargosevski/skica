@@ -90,7 +90,7 @@ enum MainMenu {
     private static func viewMenu(keymap: Keymap) -> NSMenu {
         let menu = commandMenu("View", [.zoomIn, .zoomOut, .zoomActualSize, .zoomToFit, .zoomToSelection], keymap: keymap)
         menu.addItem(.separator())
-        for command in [CommandID.toggleLayers, .toggleInspector, .toggleZen, .focusLayers, .focusInspector] {
+        for command in [CommandID.toggleLayers, .toggleInspector, .toggleZen, .toggleIsolation, .focusLayers, .focusInspector] {
             menu.addItem(commandItem(command, keymap: keymap))
         }
         menu.addItem(.separator())

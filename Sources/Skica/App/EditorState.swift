@@ -17,6 +17,8 @@ final class EditorState {
     var modeHint: String?
     /// A short note in the status line, e.g. after exporting; cleared after a few seconds.
     var message: String?
+    /// "Show Only Selection": other layers are hidden on the canvas, not in the document.
+    var isolation: Isolation?
 }
 
 struct PromptState: Equatable {

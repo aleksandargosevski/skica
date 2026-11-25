@@ -39,7 +39,7 @@ public enum CommandID: String, CaseIterable, Codable, Sendable {
     // Pages
     case newPage, deletePage, renamePage, nextPage, previousPage, goToPage, moveToPage
     // View
-    case zoomIn, zoomOut, zoomActualSize, zoomToFit, zoomToSelection, toggleLayers, toggleInspector, toggleZen
+    case zoomIn, zoomOut, zoomActualSize, zoomToFit, zoomToSelection, toggleLayers, toggleInspector, toggleZen, toggleIsolation
     // App
     case focusLayers, focusInspector, commandPalette, selectionActions, showShortcuts, commandLine, repeatCommand, hintSelect, hintAdd
 
@@ -127,6 +127,7 @@ public enum CommandID: String, CaseIterable, Codable, Sendable {
         case .toggleLayers: "Show/Hide Layers"
         case .toggleInspector: "Show/Hide Inspector"
         case .toggleZen: "Canvas Only"
+        case .toggleIsolation: "Show Only Selection"
         case .focusLayers: "Go to Layers"
         case .focusInspector: "Go to Inspector"
         case .commandPalette: "Command Palette"
@@ -154,7 +155,7 @@ public enum CommandID: String, CaseIterable, Codable, Sendable {
              .createSharedStyle, .applySharedStyle, .updateSharedStyle, .resetToSharedStyle, .detachSharedStyle,
              .applyColor, .addColorToPalette: .symbols
         case .newPage, .deletePage, .renamePage, .nextPage, .previousPage, .goToPage, .moveToPage: .pages
-        case .zoomIn, .zoomOut, .zoomActualSize, .zoomToFit, .zoomToSelection, .toggleLayers, .toggleInspector, .toggleZen: .view
+        case .zoomIn, .zoomOut, .zoomActualSize, .zoomToFit, .zoomToSelection, .toggleLayers, .toggleInspector, .toggleZen, .toggleIsolation: .view
         case .focusLayers, .focusInspector, .commandPalette, .selectionActions, .showShortcuts, .commandLine, .repeatCommand: .app
         case .hintSelect, .hintAdd: .selection
         }

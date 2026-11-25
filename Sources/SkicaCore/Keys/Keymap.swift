@@ -104,6 +104,7 @@ public enum KeymapPreset: String, Codable, CaseIterable, Sendable {
         .toggleLayers: ["cmd+opt+1"],
         .toggleInspector: ["cmd+opt+2"],
         .toggleZen: ["cmd+."],
+        .toggleIsolation: ["cmd+opt+shift+h"],
         .focusLayers: ["g l"],
         .focusInspector: ["g i"],
         .commandPalette: ["cmd+p", "cmd+shift+p"],
